@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'projectApp1',
     'projectApp2',
+    'projectApp3',
 ]
 
 MIDDLEWARE = [
