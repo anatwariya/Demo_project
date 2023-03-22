@@ -32,7 +32,7 @@ class CarPartViewSet(viewsets.ViewSet):
 
     def create(self, request):
         data = request.data
-        car_part = CarPart(car_part_name=data["car_part_name"], car_part_car_model=data["car_part_car_model"])
+        car_part = CarPart(car_part_name=data["car_part_name"], price=data["price"])
         car_part.save()
         serializer = CarPartSerializer(car_part)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -44,7 +44,7 @@ class CarPartViewSet(viewsets.ViewSet):
         except CarPart.DoesNotExist:
             return Response({"message": f"CarPart data not found with CarPartId:- {pk}"}, status=status.HTTP_204_NO_CONTENT)
         car_part.car_part_name = data["car_part_name"]
-        car_part.car_part_car_model = data["car_part_car_model"]
+        car_part.price = data["price"]
         car_part.save()
         serializer = CarPartSerializer(car_part)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -56,7 +56,7 @@ class CarPartViewSet(viewsets.ViewSet):
         except CarPart.DoesNotExist:
             return Response({"message": f"CarPart data not found with CarPartId:- {pk}"}, status=status.HTTP_204_NO_CONTENT)
         car_part.car_part_name = data.get("car_part_name", car_part.car_part_name)
-        car_part.car_part_car_model = data.get("car_part_car_model", car_part.car_part_car_model)
+        car_part.price = data.get("price", car_part.price)
         car_part.save()
         serializer = CarPartSerializer(car_part)
         return Response(serializer.data, status=status.HTTP_200_OK)

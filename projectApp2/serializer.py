@@ -5,7 +5,6 @@ from .models import Car
 
 
 class CarSerializer(serializers.Serializer):
-    depth = 1
     id = serializers.ReadOnlyField()
     model_name = serializers.CharField(max_length=30)
     color = serializers.CharField(max_length=20)
