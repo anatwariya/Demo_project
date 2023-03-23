@@ -8,10 +8,11 @@ from projectApp2.models import Car
 from projectApp3.models import CarPart
 from .models import User
 from .serializer import UserSerializer
-from django.conf import settings
-from django.core.mail import send_mail
 
 from .token import account_activation_token
+from sendgrid import SendGridAPIClient
+import os
+from sendgrid.helpers.mail import Mail
 
 
 class UserAPIView(APIView):
@@ -20,7 +21,8 @@ class UserAPIView(APIView):
             try:
                 user = User.objects.get(pk=pk)
             except User.DoesNotExist:
-                return Response({"message": f"User data not found with UserId:- {pk}"}, status=status.HTTP_204_NO_CONTENT)
+                return Response({"message": f"User data not found with UserId:- {pk}"},
+                                status=status.HTTP_204_NO_CONTENT)
             serializer = UserSerializer(user)
         else:
             users = User.objects.all()
@@ -31,7 +33,7 @@ class UserAPIView(APIView):
         data = request.data
         user = User(name=data["name"], username=data["username"], email=data["email"], password=data["password"])
         user.save()
-        if data.get("user_cars",False):
+        if data.get("user_cars", False):
             for car_id in data["user_cars"]:
                 car = Car.objects.get(id=car_id)
                 user.user_cars.add(car)
@@ -42,12 +44,21 @@ class UserAPIView(APIView):
         token = account_activation_token.make_token(user)
         confirmation_link = f'http://127.0.0.1:8000/projectMainApp/user_email_confirmation/{user_id}/{token}/'
         subject = 'Welcome to Car-Part world'
-        message = f'Hi {data["name"]},\nThank you for registering in Car-Part world.\n' \
-                  f'Please click on this link for active your account.\n' \
-                  f'{confirmation_link}'
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = [data["email"], ]
-        send_mail(subject, message, email_from, recipient_list)
+        message1 = f'Hi {data["name"]},\nThank you for registering in Car-Part world.\n' \
+                   f'Please click on this link for active your account.\n' \
+                   f'{confirmation_link}'
+        message = Mail(
+            from_email='demomails.django@gmail.com',
+            to_emails=data["email"],
+            subject=subject,
+            plain_text_content=message1)
+        try:
+            print(os.environ.get('SENDGRID_API_KEY'))
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            response = sg.send(message)
+        except Exception as e:
+            print("Exception", e)
+        user.delete()
         return Response(data, status=status.HTTP_200_OK)
 
     def put(self, request):
@@ -55,7 +66,8 @@ class UserAPIView(APIView):
         try:
             user = User.objects.get(pk=data["id"])
         except User.DoesNotExist:
-            return Response({"message": f"User data not found with UserId:- {data['id']}"}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": f"User data not found with UserId:- {data['id']}"},
+                            status=status.HTTP_204_NO_CONTENT)
         user.name = data["name"]
         user.username = data["username"]
         user.email = data["email"]
@@ -69,7 +81,8 @@ class UserAPIView(APIView):
         try:
             user = User.objects.get(pk=data["id"])
         except User.DoesNotExist:
-            return Response({"message": f"User data not found with UserId:- {data['id']}"}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": f"User data not found with UserId:- {data['id']}"},
+                            status=status.HTTP_204_NO_CONTENT)
         user.name = data.get("name", user.name)
         user.email = data.get("email", user.email)
         user.username = data.get("username", user.username)
@@ -98,7 +111,8 @@ class UserAPIView(APIView):
             try:
                 user = User.objects.get(pk=pk)
             except User.DoesNotExist:
-                return Response({"message": f"User data not found with UserId:- {pk}"}, status=status.HTTP_204_NO_CONTENT)
+                return Response({"message": f"User data not found with UserId:- {pk}"},
+                                status=status.HTTP_204_NO_CONTENT)
             user.delete()
             return Response({"message": "User deleted successfully."}, status=status.HTTP_200_OK)
         else:
