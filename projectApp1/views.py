@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_bytes
 from projectApp2.models import Car
 from projectApp3.models import CarPart
@@ -31,7 +32,8 @@ class UserAPIView(APIView):
 
     def post(self, request):
         data = request.data
-        user = User(name=data["name"], username=data["username"], email=data["email"], password=data["password"])
+        user = User(name=data["name"], username=data["username"], email=data["email"])
+        user.password = make_password(data['password'])
         user.save()
         if data.get("user_cars", False):
             for car_id in data["user_cars"]:
@@ -58,7 +60,6 @@ class UserAPIView(APIView):
             response = sg.send(message)
         except Exception as e:
             print("Exception", e)
-        user.delete()
         return Response(data, status=status.HTTP_200_OK)
 
     def put(self, request):
@@ -71,7 +72,6 @@ class UserAPIView(APIView):
         user.name = data["name"]
         user.username = data["username"]
         user.email = data["email"]
-        user.password = data["password"]
         user.save()
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -86,7 +86,6 @@ class UserAPIView(APIView):
         user.name = data.get("name", user.name)
         user.email = data.get("email", user.email)
         user.username = data.get("username", user.username)
-        user.password = data.get("password", user.password)
         if data.get("user_cars", False):
             user.user_cars.clear()
             for car_id in data["user_cars"]:

@@ -13,6 +13,7 @@ from projectApp2.serializer import CarSerializer
 from projectApp3.models import CarPart
 from projectApp3.serializer import CarPartSerializer
 from django.core.mail import send_mail
+from django.contrib.auth.hashers import check_password, make_password
 
 
 @api_view(('GET',))
@@ -74,7 +75,7 @@ def login(request):
         user = User.objects.filter(username=data["username"]).first()
     else:
         return Response({'message': f'No data found for Username:- {data["username"]}'}, status=status.HTTP_404_NOT_FOUND)
-    if user.password != data["password"]:
+    if not check_password(data['password'], user.password):
         return Response({'message': 'Invalid username or Password.'}, status=status.HTTP_406_NOT_ACCEPTABLE)
     serializer = UserSerializer(user)
     data = serializer.data
@@ -88,11 +89,11 @@ def reset_password(request):
         user = User.objects.filter(username=data["username"]).first()
     else:
         return Response({'message': f'No data found for Username:- {data["username"]}'}, status=status.HTTP_404_NOT_FOUND)
-    if user.password != data["old_password"]:
+    if not check_password(data['old_password'], user.password):
         return Response({'message': 'Invalid Old Password.'}, status=status.HTTP_406_NOT_ACCEPTABLE)
     if data["new_password"] != data["confirm_password"]:
         return Response({'message': 'Confirm Password does not match.'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-    user.password = data["new_password"]
+    user.password = make_password(data['new_password'])
     user.save()
     serializer = UserSerializer(user)
     data = serializer.data
@@ -106,9 +107,9 @@ def forget_password(request, uid, token):
         user = User.objects.filter(username=data["username"]).first()
     else:
         return Response({'message': f'No data found for Username:- {data["username"]}'}, status=status.HTTP_404_NOT_FOUND)
-    if data["password"] != data["confirm_password"]:
+    if data["new_password"] != data["confirm_password"]:
         return Response({'message': 'Confirm Password does not match.'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-    user.password = data["password"]
+    user.password = make_password(data['new_password'])
     user.save()
     serializer = UserSerializer(user)
     data = serializer.data
