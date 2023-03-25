@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Signup Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css_files/home.css' %}">
+  </head>
+  <body>
+    <div class="full-page">
+      <div class="navbar">
+        <nav>
+          <ul id='MenuItems'>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href='#'>About Us</a></li>
+            <li><a href='#'>Services</a></li>
+            <li><a href='#'>Contact</a></li>
+            <li><a href="{% url 'login' %}" style="width:auto;">Login</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class='login-page'>
+        <div class="form-box">
+          <div class='headline-box'>
+            <div class='headline'>Register</div>
+          </div>
+          <form id='register' class='input-group-register'>
+            <input type='text'class='input-field'placeholder='First Name' required>
+            <input type='text'class='input-field'placeholder='Last Name ' required>
+            <input type='email'class='input-field'placeholder='Email Id' required>
+            <input type='password'class='input-field'placeholder='Enter Password' required>
+            <input type='password'class='input-field'placeholder='Confirm Password'  required>
+            <button type='submit'class='submit-btn'>Sing Up</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
