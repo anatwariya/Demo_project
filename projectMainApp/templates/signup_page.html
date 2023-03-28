@@ -9,6 +9,9 @@
   <body>
     <div class="full-page">
       <div class="navbar">
+        <div>
+          <img class="logo" src="{% static 'images/logo.jpg' %}">
+        </div>
         <nav>
           <ul id='MenuItems'>
             <li><a href="{% url 'home' %}">Home</a></li>
@@ -19,20 +22,27 @@
           </ul>
         </nav>
       </div>
-      <div class='login-page'>
-        <div class="form-box">
-          <div class='headline-box'>
-            <div class='headline'>Register</div>
-          </div>
-          <form id='register' class='input-group-register'>
-            <input type='text'class='input-field'placeholder='First Name' required>
-            <input type='text'class='input-field'placeholder='Last Name ' required>
-            <input type='email'class='input-field'placeholder='Email Id' required>
-            <input type='password'class='input-field'placeholder='Enter Password' required>
-            <input type='password'class='input-field'placeholder='Confirm Password'  required>
-            <button type='submit'class='submit-btn'>Sing Up</button>
-          </form>
+      <div class="form-box">
+        <div class='headline-box'>
+          <div class='headline'>Register</div>
         </div>
+        <form id='register' class='input-group-register' method="post">
+          {% if messages %}
+          <ul>
+            {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message }}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <input type='text' class='input-field' placeholder='Full Name' required id="name" name="name">
+          <input type='text' class='input-field'placeholder='UserName ' required id="username" name="username">
+          <input type='email' class='input-field'placeholder='Email Id' required id="email" name="email">
+          <input type='password' class='input-field'placeholder='Enter Password' required id="password" name="password">
+          <input type='password' class='input-field'placeholder='Confirm Password'  required id="confirm_password" name="confirm_password">
+          <button type='submit' class='submit-btn'>Sing Up</button>
+        </form>
       </div>
     </div>
   </body>

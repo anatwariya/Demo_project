@@ -14,9 +14,11 @@ from .token import account_activation_token
 from sendgrid import SendGridAPIClient
 import os
 from sendgrid.helpers.mail import Mail
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserAPIView(APIView):
+
     def get(self, request, pk=None):
         if pk:
             try:
@@ -42,24 +44,24 @@ class UserAPIView(APIView):
         user.save()
         serializer = UserSerializer(user)
         data = serializer.data
-        user_id = urlsafe_base64_encode(force_bytes(data["id"]))
-        token = account_activation_token.make_token(user)
-        confirmation_link = f'http://127.0.0.1:8000/projectMainApp/user_email_confirmation/{user_id}/{token}/'
-        subject = 'Welcome to Car-Part world'
-        message1 = f'Hi {data["name"]},\nThank you for registering in Car-Part world.\n' \
-                   f'Please click on this link for active your account.\n' \
-                   f'{confirmation_link}'
-        message = Mail(
-            from_email='demomails.django@gmail.com',
-            to_emails=data["email"],
-            subject=subject,
-            plain_text_content=message1)
-        try:
-            print(os.environ.get('SENDGRID_API_KEY'))
-            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-            response = sg.send(message)
-        except Exception as e:
-            print("Exception", e)
+        # user_id = urlsafe_base64_encode(force_bytes(data["id"]))
+        # token = account_activation_token.make_token(user)
+        # confirmation_link = f'http://127.0.0.1:8000/car_world/user_email_confirmation/{user_id}/{token}/'
+        # subject = 'Welcome to Car-Part world'
+        # message1 = f'Hi {data["name"]},\nThank you for registering in Car-Part world.\n' \
+        #            f'Please click on this link for active your account.\n' \
+        #            f'{confirmation_link}'
+        # message = Mail(
+        #     from_email='demomails.django@gmail.com',
+        #     to_emails=data["email"],
+        #     subject=subject,
+        #     plain_text_content=message1)
+        # try:
+        #     print(os.environ.get('SENDGRID_API_KEY'))
+        #     sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        #     response = sg.send(message)
+        # except Exception as e:
+        #     print("Exception", e)
         return Response(data, status=status.HTTP_200_OK)
 
     def put(self, request):

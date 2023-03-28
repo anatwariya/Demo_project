@@ -2,30 +2,45 @@
 {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+}
+.logo
+{
+    width: 100px;
+    height: 40px;
+    padding: 0px 0px;
+    padding-left: 50px;
+    padding-right: 50px;
 }
 .full-page
 {
     height: 100%;
 	width: 100%;
+    padding-top: 50px;
 	background-image: linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url(../images/background_img.jpg);
-	background-position: center;
+	background-attachment: fixed;
+    background-position: 0px 0px;
 	background-size: cover;
 	position: absolute;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
 }
 .navbar
 {
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    width: 100%;
     display: flex;
     align-items: center;
-    padding: 20px;
+    padding: 0px;
     padding-left: 50px;
     padding-right: 30px;
-    padding-top: 50px;
+    padding-top: 10px;
 }
 nav
 {
     flex: 1;
-    text-align: right;
+    text-align: left;
 }
 nav ul
 {
@@ -64,8 +79,8 @@ nav ul li a:hover
 }
 a
 {
-    text-decoration: none;
     color: palevioletred;
+	text-align:center;
     font-size: 28px;
 }
 .form-box
@@ -86,10 +101,13 @@ a
 }
 .headline
 {
-    margin:10px 0px;
-	padding:10px 110px;
-	position: center;
+    padding: 10px 30px;
+	display: block;
+	margin: auto;
 	background: #F3C693;
+	text-align:center;
+	border: 0;
+	outline: none;
 }
 .input-group-register
 {
@@ -112,7 +130,7 @@ a
 }
 .submit-btn
 {
-	width: 50%;
+	width: auto;
 	padding: 10px 30px;
 	cursor: pointer;
 	display: block;
@@ -120,11 +138,8 @@ a
 	background: #F3C693;
 	border: 0;
 	outline: none;
+	text-align:center;
 	border-radius: 30px;
-}
-.check-box
-{
-	margin: 30px 10px 34px 0;
 }
 span
 {
@@ -141,4 +156,19 @@ span
 {
 	color:white;
 	font-size: 15;
+}
+.tile-box
+{
+	width: 100%;
+	margin:0px 45px;
+	box-shadow: 0 0 20px 9px #ff61241f;
+}
+.column-4 {
+  float: left;
+  width: 26%;
+  margin:10px;
+  height: 250px;
+  text-align:center;
+  overflow: hidden;
+  background:rgba(0,0,0,0.1);
 }

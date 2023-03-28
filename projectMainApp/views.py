@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,6 +10,7 @@ from django.conf import settings
 from projectApp1.models import User
 from projectApp1.serializer import UserSerializer
 from projectApp1.token import account_activation_token
+from projectApp1.views import UserAPIView
 from projectApp2.models import Car
 from projectApp2.serializer import CarSerializer
 from projectApp3.models import CarPart
@@ -17,6 +20,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.template import loader
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib import messages
+from validate_email_address import validate_email
 
 @api_view(('GET',))
 def car_parts_filter_based_on_user(request, pk):
@@ -90,7 +94,7 @@ def reset_password(request):
 
 
 @api_view(('POST',))
-def forget_password(request, uid, token):
+def forget_password_reset(request, uid, token):
     data = request.data
     if User.objects.filter(username=data["username"]).exists():
         user = User.objects.filter(username=data["username"]).first()
@@ -106,19 +110,12 @@ def forget_password(request, uid, token):
     return Response(data, status=status.HTTP_200_OK)
 
 
-@api_view(('POST',))
-def send_forget_password_email(request):
-    data = request.data
-    if User.objects.filter(username=data["username"]).exists():
-        user = User.objects.filter(username=data["username"]).first()
-    else:
-        return Response({'message': f'No data found for Username:- {data["username"]}'},
-                        status=status.HTTP_404_NOT_FOUND)
+def send_forget_password_email(user):
     serializer = UserSerializer(user)
     data = serializer.data
     user_id = urlsafe_base64_encode(force_bytes(data["id"]))
     token = account_activation_token.make_token(user)
-    confirmation_link = f'http://127.0.0.1:8000/projectMainApp/forget_password/{user_id}/{token}/'
+    confirmation_link = f'http://127.0.0.1:8000/car_world/forget_password_reset/{user_id}/{token}/'
     subject = 'Forget Password!'
     message = f'Hi {data["name"]},\nThis is the mail regarding your Forget Password request from Car-Part World ' \
               f'Portal.\n' \
@@ -126,24 +123,45 @@ def send_forget_password_email(request):
               f'{confirmation_link}'
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [data["email"], ]
-    send_mail(subject, message, email_from, recipient_list)
-    return Response({"message": 'An Email has been sent to your registered EmailId.'}, status=status.HTTP_200_OK)
+    #send_mail(subject, message, email_from, recipient_list)
+
+
+@api_view(('POST', 'GET'))
+def forget_password(request, uid=None, token=None):
+    if request.method == "POST":
+        data = request.data
+        if User.objects.filter(email=data["email_username"]).exists():
+            user = User.objects.filter(email=data["email_username"]).first()
+        elif User.objects.filter(username=data["email_username"]).exists():
+            user = User.objects.filter(username=data["email_username"]).first()
+        else:
+            messages.error(request, "User Not exist with given Email/UserName")
+            return render(request, "forget_password.html")
+        send_forget_password_email(user)
+        messages.success(request, "An Email has been sent to your account.")
+        return render(request, 'home_page.html')
+    return render(request, 'forget_password.html')
 
 
 @api_view(('GET', 'POST',))
 def login(request):
     template = loader.get_template('login_page.html')
+    messages.set_level(request, 0)
     if request.method == 'POST':
         data = request.data
-        if User.objects.filter(username=data["username"]).exists():
-            user = User.objects.filter(username=data["username"]).first()
+        if User.objects.filter(email=data["email_username"]).exists():
+            user = User.objects.filter(email=data["email_username"]).first()
+        elif User.objects.filter(username=data["email_username"]).exists():
+            user = User.objects.filter(username=data["email_username"]).first()
         else:
+            messages.error(request, "User doesn't exist with this Email/UserName.")
             return render(request, 'login_page.html')
         if not check_password(data['password'], user.password):
-            return HttpResponse(template.render())
+            messages.error(request, "Wrong Password.")
+            return render(request, 'login_page.html')
         serializer = UserSerializer(user)
         data = serializer.data
-        return redirect('reset_password')
+        return redirect('home')
     return HttpResponse(template.render())
 
 
@@ -152,23 +170,29 @@ def signup(request):
     template = loader.get_template('signup_page.html')
     if request.method == 'POST':
         data = request.data
+        if User.objects.filter(username=data["username"]).exists():
+            messages.error(request, "UserName is already taken.")
+            return render(request, 'signup_page.html')
+        if User.objects.filter(email=data["email"]).exists():
+            messages.error(request, "Email is already in use.")
+            return render(request, 'signup_page.html')
+        if not validate_email(data["email"]):
+            messages.error(request, "Email doesn't exist.")
+            return render(request, "signup_page.html")
+        if data['password'] != data["confirm_password"]:
+            messages.error(request, "Password and confirm password does not match.")
+            return render(request, "signup_page.html")
+        data = UserAPIView.as_view()(request._request)
+        messages.error(request, "User registration is successful.")
         return redirect('home')
     return HttpResponse(template.render())
 
-@api_view(('GET',))
+
+@api_view(('GET', 'POST'))
 def home(request):
     template = loader.get_template('home_page.html')
-    if request.method == 'POST':
-        data = request.data
-        if User.objects.filter(username=data["username"]).exists():
-            user = User.objects.filter(username=data["username"]).first()
-        else:
-            messages.error(request, f'No data found for Username:- {data["username"]}')
-            return render(request, 'login_page.html')
-        if not check_password(data['password'], user.password):
-            messages.error(request, 'Invalid username or Password.')
-            return HttpResponse(template.render())
-        serializer = UserSerializer(user)
-        data = serializer.data
-        return redirect('reset_password')
-    return HttpResponse(template.render())
+    car_parts = CarPart.objects.all()
+    serializer = CarPartSerializer(car_parts, many=True)
+    car_parts = json.dumps(serializer.data)
+    car_parts = {"items": json.loads(car_parts)}
+    return render(request, 'home_page.html', car_parts)

@@ -10,17 +10,43 @@
     <div class="full-page">
       <div class="navbar">
         <div>
-          <a href='#'>Car World</a>
+          <img class="logo" src="{% static 'images/logo.jpg' %}">
         </div>
         <nav>
           <ul id='MenuItems'>
-            <li><a href='#'>Home</a></li>
+            <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href='#'>About Us</a></li>
             <li><a href='#'>Services</a></li>
             <li><a href='#'>Contact</a></li>
             <li><a href="{% url 'login' %}" style="width:auto;">Login</a></li>
           </ul>
         </nav>
+      </div>
+      <div>
+        <div class="tile-box">
+          {% if items %}
+            {% for car_part in items %}
+            <div class="column-4">
+              <ul>
+                <li>
+                  <img src="https://www.kindpng.com/picc/m/427-4271782_car-detailing-vector-library-stock-black-and-white.png" width="150" height="150">
+                  <h2>{{ car_part.car_part_name }}</h2>
+                  <h2>{{ car_part.price }}</h2>
+                </li>
+              </ul>
+            </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% if messages %}
+        <ul>
+          {% for message in messages %}
+          <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </div>
     </div>
   </body>
