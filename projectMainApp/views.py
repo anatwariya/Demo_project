@@ -74,25 +74,6 @@ def send_user_confirmation_email(request, pk):
     return Response({"message": 'An Email has been sent to your registered EmailId.'}, status=status.HTTP_200_OK)
 
 
-@api_view(('POST', 'GET', ))
-def reset_password(request):
-    data = request.data
-    if User.objects.filter(username=data["username"]).exists():
-        user = User.objects.filter(username=data["username"]).first()
-    else:
-        return Response({'message': f'No data found for Username:- {data["username"]}'},
-                        status=status.HTTP_404_NOT_FOUND)
-    if not check_password(data['old_password'], user.password):
-        return Response({'message': 'Invalid Old Password.'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-    if data["new_password"] != data["confirm_password"]:
-        return Response({'message': 'Confirm Password does not match.'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-    user.password = make_password(data['new_password'])
-    user.save()
-    serializer = UserSerializer(user)
-    data = serializer.data
-    return Response(data, status=status.HTTP_200_OK)
-
-
 @api_view(('POST',))
 def forget_password_reset(request, uid, token):
     data = request.data
@@ -139,8 +120,32 @@ def forget_password(request, uid=None, token=None):
             return render(request, "forget_password.html")
         send_forget_password_email(user)
         messages.success(request, "An Email has been sent to your account.")
-        return render(request, 'home_page.html')
+        return render(request, 'redirect_page.html')
     return render(request, 'forget_password.html')
+
+
+@api_view(('POST', 'GET', ))
+def reset_password(request):
+    if request.method == 'POST':
+        data = request.data
+        if User.objects.filter(username=data["username"]).exists():
+            user = User.objects.filter(username=data["username"]).first()
+        else:
+            messages.error(request, "User Not exist with given UserName")
+            return render(request, "reset_password_page.html")
+        if not check_password(data['old_password'], user.password):
+            messages.error(request, "Invalid Current Password.")
+            return render(request, "reset_password_page.html")
+        if data["new_password"] != data["confirm_password"]:
+            messages.error(request, "Confirm Password does not match with New Password.")
+            return render(request, "reset_password_page.html")
+        user.password = make_password(data['new_password'])
+        user.save()
+        serializer = UserSerializer(user)
+        data = serializer.data
+        messages.success(request, "Password Changed.")
+        return render(request, "redirect_page.html")
+    return render(request, 'reset_password_page.html')
 
 
 @api_view(('GET', 'POST',))
@@ -183,16 +188,33 @@ def signup(request):
             messages.error(request, "Password and confirm password does not match.")
             return render(request, "signup_page.html")
         data = UserAPIView.as_view()(request._request)
-        messages.error(request, "User registration is successful.")
-        return redirect('home')
+        messages.success(request, "User registration is successful.")
+        return redirect('redirect')
     return HttpResponse(template.render())
 
 
 @api_view(('GET', 'POST'))
 def home(request):
-    template = loader.get_template('home_page.html')
     car_parts = CarPart.objects.all()
     serializer = CarPartSerializer(car_parts, many=True)
     car_parts = json.dumps(serializer.data)
     car_parts = {"items": json.loads(car_parts)}
     return render(request, 'home_page.html', car_parts)
+
+
+@api_view(('GET',))
+def about_us(request):
+    return render(request, 'about_us_page.html')
+
+
+@api_view(('GET', 'POST'))
+def contact_us(request):
+    if request.method == 'POST':
+        messages.success(request, "Thanks For Reaching Us out.")
+        return render(request, 'redirect_page.html')
+    return render(request, 'contact_us_page.html')
+
+
+@api_view(('GET',))
+def redirect(request):
+    return render(request, 'redirect_page.html')

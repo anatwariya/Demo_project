@@ -10,32 +10,31 @@
     <div class="full-page">
       <div class="navbar">
         <div>
-          <img class="logo" src="{% static 'images/logo.jpg' %}">
+          <a href="{% url 'home' %}"><img class="logo" src="{% static 'images/logo.jpg' %}"></a>
         </div>
         <nav>
           <ul id='MenuItems'>
             <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href='#'>About Us</a></li>
-            <li><a href='#'>Services</a></li>
-            <li><a href='#'>Contact</a></li>
-            <li><a href="{% url 'login' %}" style="width:auto;">Login</a></li>
+            <li><a href="{% url 'about_us' %}">About Us</a></li>
+            <li><a href="{% url 'contact_us' %}">Contact</a></li>
+            <li><a href="{% url 'login' %}">Login</a></li>
           </ul>
         </nav>
       </div>
       <div class="form-box">
+        {% if messages %}
+        <ul>
+          {% for message in messages %}
+          <li {% if message.tags %} style="list-style: none; text-align:center; color:white; margin-bottom:20px;" class="{{ message.tags }}"{% endif %}>
+            {{ message }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
         <div class='headline-box'>
           <div class='headline'>Register</div>
         </div>
         <form id='register' class='input-group-register' method="post">
-          {% if messages %}
-          <ul>
-            {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>
-            {{ message }}
-            </li>
-            {% endfor %}
-          </ul>
-          {% endif %}
           <input type='text' class='input-field' placeholder='Full Name' required id="name" name="name">
           <input type='text' class='input-field'placeholder='UserName ' required id="username" name="username">
           <input type='email' class='input-field'placeholder='Email Id' required id="email" name="email">

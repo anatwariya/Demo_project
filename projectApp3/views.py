@@ -34,6 +34,9 @@ class CarPartViewSet(viewsets.ViewSet):
         data = request.data
         car_part = CarPart(car_part_name=data["car_part_name"], price=data["price"])
         car_part.save()
+        if data.get("img_url", False):
+            car_part.img_url = data["img_url"]
+            car_part.save()
         serializer = CarPartSerializer(car_part)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -45,6 +48,7 @@ class CarPartViewSet(viewsets.ViewSet):
             return Response({"message": f"CarPart data not found with CarPartId:- {pk}"}, status=status.HTTP_204_NO_CONTENT)
         car_part.car_part_name = data["car_part_name"]
         car_part.price = data["price"]
+        car_part.img_url = data["img_url"]
         car_part.save()
         serializer = CarPartSerializer(car_part)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -57,6 +61,7 @@ class CarPartViewSet(viewsets.ViewSet):
             return Response({"message": f"CarPart data not found with CarPartId:- {pk}"}, status=status.HTTP_204_NO_CONTENT)
         car_part.car_part_name = data.get("car_part_name", car_part.car_part_name)
         car_part.price = data.get("price", car_part.price)
+        car_part.img_url = data.get("img_url", car_part.img_url)
         car_part.save()
         serializer = CarPartSerializer(car_part)
         return Response(serializer.data, status=status.HTTP_200_OK)
