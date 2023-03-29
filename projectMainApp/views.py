@@ -1,6 +1,6 @@
 import json
 
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -21,6 +21,9 @@ from django.template import loader
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib import messages
 from validate_email_address import validate_email
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 @api_view(('GET',))
 def car_parts_filter_based_on_user(request, pk):
@@ -104,7 +107,7 @@ def send_forget_password_email(user):
               f'{confirmation_link}'
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [data["email"], ]
-    #send_mail(subject, message, email_from, recipient_list)
+    # send_mail(subject, message, email_from, recipient_list)
 
 
 @api_view(('POST', 'GET'))
@@ -124,7 +127,9 @@ def forget_password(request, uid=None, token=None):
     return render(request, 'forget_password.html')
 
 
-@api_view(('POST', 'GET', ))
+@api_view(('POST', 'GET',))
+# @authentication_classes([BasicAuthentication])
+# @permission_classes([IsAuthenticated])
 def reset_password(request):
     if request.method == 'POST':
         data = request.data
@@ -218,3 +223,19 @@ def contact_us(request):
 @api_view(('GET',))
 def redirect_to(request):
     return render(request, 'redirect_page.html')
+
+
+@api_view(('GET', 'POST'))
+def user_profile(request):
+    if request.method == 'POST':
+        request._request.method = "PATCH"
+        user = UserAPIView.as_view()(request._request)
+        messages.success(request, "Name Updated successfully.")
+        return render(request, 'user_profile_page.html', user)
+    data = {
+        "user": {
+            "name": "Ajay Kumar Natwariya",
+            "username": "AAAAAAAA0",
+            "email": "asdsaf@dgdfgv.com"
+        }}
+    return render(request, 'user_profile_page.html', data)

@@ -1,0 +1,18 @@
+.input-field
+{
+	width: 100%;
+	padding:10px 0;
+	text-align:center;
+	margin:5px 0;
+	border:0;
+	outline:none;
+	background-color: rgba(0, 0, 0, 0.1);
+}
+.input-group-register
+{
+    top: 120px;
+	padding:10px 0;
+	position: left;
+	width:280px;
+	transition:.5s;
+}

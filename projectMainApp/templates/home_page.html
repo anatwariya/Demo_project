@@ -19,19 +19,11 @@
             <li><a href="{% url 'contact_us' %}">Contact</a></li>
             <li><a href="{% url 'login' %}">Login</a></li>
             <li><a href="{% url 'signup' %}">Signup</a></li>
+            <li><a href="{% url 'user_profile' %}">User Profile</a></li>
           </ul>
         </nav>
       </div>
       <div>
-        {% if messages %}
-        <ul>
-          {% for message in messages %}
-          <li {% if message.tags %} style="list-style: none; text-align:center; color:white; margin-bottom:20px;" class="{{ message.tags }}"{% endif %}>
-            {{ message }}
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
         <div class="tile-box">
           {% if items %}
             {% for car_part in items %}

@@ -23,6 +23,15 @@
     </nav>
   </div>
   <div class="form-box">
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li {% if message.tags %} style="list-style: none; text-align:center; color:white; margin-bottom:20px;" class="{{ message.tags }}"{% endif %}>
+        {{ message }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
     <div class='headline-box' style="text-align:center;">
       <div class='headline'>You will be redirected to Home Page in...</div>
       <a style="text-align:center; margin-top: 30px;">3...2..1.</a>

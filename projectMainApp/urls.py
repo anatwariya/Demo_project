@@ -16,4 +16,5 @@ urlpatterns = [
     path('about_us/', views.about_us, name='about_us'),
     path('contact_us/', views.contact_us, name='contact_us'),
     path('redirect_to/', views.redirect_to, name='redirect_to'),
+    path('user_profile/', views.user_profile, name='user_profile'),
 ]
