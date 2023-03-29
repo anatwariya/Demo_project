@@ -15,5 +15,5 @@ urlpatterns = [
     path('forget_password/', views.forget_password, name="forget_password"),
     path('about_us/', views.about_us, name='about_us'),
     path('contact_us/', views.contact_us, name='contact_us'),
-    path('redirect/', views.redirect, name='redirect'),
+    path('redirect_to/', views.redirect_to, name='redirect_to'),
 ]

@@ -189,7 +189,7 @@ def signup(request):
             return render(request, "signup_page.html")
         data = UserAPIView.as_view()(request._request)
         messages.success(request, "User registration is successful.")
-        return redirect('redirect')
+        return redirect('redirect_to')
     return HttpResponse(template.render())
 
 
@@ -216,5 +216,5 @@ def contact_us(request):
 
 
 @api_view(('GET',))
-def redirect(request):
+def redirect_to(request):
     return render(request, 'redirect_page.html')
