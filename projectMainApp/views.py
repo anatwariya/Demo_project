@@ -22,10 +22,15 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.contrib import messages
 from validate_email_address import validate_email
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from django.contrib.auth import login, logout
+from rest_framework.authtoken.models import Token
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 
 
 @api_view(('GET',))
+@permission_classes([IsAuthenticated])
 def car_parts_filter_based_on_user(request, pk):
     car_parts = []
     user = User.objects.get(id=pk)
@@ -41,6 +46,7 @@ def car_parts_filter_based_on_user(request, pk):
 
 
 @api_view(('GET',))
+@permission_classes([AllowAny])
 def user_email_confirmation(request, uid, token):
     try:
         pk = force_str(urlsafe_base64_decode(uid))
@@ -58,6 +64,7 @@ def user_email_confirmation(request, uid, token):
 
 
 @api_view(('GET',))
+@permission_classes([IsAuthenticated])
 def send_user_confirmation_email(request, pk):
     user = User.objects.get(id=pk)
     if user.active:
@@ -78,6 +85,7 @@ def send_user_confirmation_email(request, pk):
 
 
 @api_view(('POST',))
+@permission_classes([AllowAny])
 def forget_password_reset(request, uid, token):
     data = request.data
     if User.objects.filter(username=data["username"]).exists():
@@ -94,6 +102,8 @@ def forget_password_reset(request, uid, token):
     return Response(data, status=status.HTTP_200_OK)
 
 
+@api_view(('POST',))
+@permission_classes([AllowAny])
 def send_forget_password_email(user):
     serializer = UserSerializer(user)
     data = serializer.data
@@ -111,6 +121,7 @@ def send_forget_password_email(user):
 
 
 @api_view(('POST', 'GET'))
+@permission_classes([AllowAny])
 def forget_password(request, uid=None, token=None):
     if request.method == "POST":
         data = request.data
@@ -128,8 +139,7 @@ def forget_password(request, uid=None, token=None):
 
 
 @api_view(('POST', 'GET',))
-# @authentication_classes([BasicAuthentication])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def reset_password(request):
     if request.method == 'POST':
         data = request.data
@@ -154,28 +164,7 @@ def reset_password(request):
 
 
 @api_view(('GET', 'POST',))
-def login(request):
-    template = loader.get_template('login_page.html')
-    messages.set_level(request, 0)
-    if request.method == 'POST':
-        data = request.data
-        if User.objects.filter(email=data["email_username"]).exists():
-            user = User.objects.filter(email=data["email_username"]).first()
-        elif User.objects.filter(username=data["email_username"]).exists():
-            user = User.objects.filter(username=data["email_username"]).first()
-        else:
-            messages.error(request, "User doesn't exist with this Email/UserName.")
-            return render(request, 'login_page.html')
-        if not check_password(data['password'], user.password):
-            messages.error(request, "Wrong Password.")
-            return render(request, 'login_page.html')
-        serializer = UserSerializer(user)
-        data = serializer.data
-        return redirect('home')
-    return HttpResponse(template.render())
-
-
-@api_view(('GET', 'POST',))
+@permission_classes([AllowAny])
 def signup(request):
     template = loader.get_template('signup_page.html')
     if request.method == 'POST':
@@ -199,6 +188,7 @@ def signup(request):
 
 
 @api_view(('GET', 'POST'))
+@permission_classes([AllowAny])
 def home(request):
     car_parts = CarPart.objects.all()
     serializer = CarPartSerializer(car_parts, many=True)
@@ -208,11 +198,13 @@ def home(request):
 
 
 @api_view(('GET',))
+@permission_classes([AllowAny])
 def about_us(request):
     return render(request, 'about_us_page.html')
 
 
 @api_view(('GET', 'POST'))
+@permission_classes([AllowAny])
 def contact_us(request):
     if request.method == 'POST':
         messages.success(request, "Thanks For Reaching Us out.")
@@ -221,11 +213,13 @@ def contact_us(request):
 
 
 @api_view(('GET',))
+@permission_classes([AllowAny])
 def redirect_to(request):
     return render(request, 'redirect_page.html')
 
 
 @api_view(('GET', 'POST'))
+@permission_classes([IsAuthenticated])
 def user_profile(request):
     if request.method == 'POST':
         request._request.method = "PATCH"
@@ -239,3 +233,39 @@ def user_profile(request):
             "email": "asdsaf@dgdfgv.com"
         }}
     return render(request, 'user_profile_page.html', data)
+
+
+@api_view(('GET', 'POST',))
+@renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+@permission_classes([AllowAny])
+def user_login(request):
+    messages.set_level(request, 0)
+    if request.method == 'POST':
+        data = request.data
+        if User.objects.filter(email=data["email_username"]).exists():
+            user = User.objects.filter(email=data["email_username"]).first()
+        elif User.objects.filter(username=data["email_username"]).exists():
+            user = User.objects.filter(username=data["email_username"]).first()
+        else:
+            messages.error(request, "User doesn't exist with this Email/UserName.")
+            return render(request, 'login_page.html')
+        if not check_password(data['password'], user.password):
+            messages.error(request, "Wrong Password.")
+            return render(request, 'login_page.html')
+        token = Token.objects.get_or_create(user=user)[0].key
+        print(token)
+        login(request, user)
+        serializer = UserSerializer(user)
+        data = serializer.data
+        data["message"] = "user logged in"
+        response = {"data": data, "token": token}
+        return Response(response, template_name='home_page.html')
+    return render(request, 'login_page.html')
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def user_logout(request):
+    request.user.auth_token.delete()
+    logout(request)
+    return Response('User Logged out successfully')

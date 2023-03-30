@@ -7,7 +7,6 @@ urlpatterns = [
     path('car_parts_filter_based_on_user/<int:pk>/', views.car_parts_filter_based_on_user),
     path('user_email_confirmation/<uid>/<token>/', views.user_email_confirmation),
     path('home/', views.home, name='home'),
-    path('login/', views.login, name='login'),
     path('signup/', views.signup, name='signup'),
     path('reset_password/', views.reset_password, name='reset_password'),
     path('forget_password/<uid>/<token>/', views.forget_password_reset),
@@ -17,4 +16,6 @@ urlpatterns = [
     path('contact_us/', views.contact_us, name='contact_us'),
     path('redirect_to/', views.redirect_to, name='redirect_to'),
     path('user_profile/', views.user_profile, name='user_profile'),
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
 ]

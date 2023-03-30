@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'projectApp3',
     'projectMainApp',
     'bootstrap4',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,5 @@ MESSAGE_TAGS = {
     messages.INFO: '',
     messages.ERROR: 'danger',
 }
+
+AUTH_USER_MODEL='projectApp1.User'

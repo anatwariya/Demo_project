@@ -1,9 +1,10 @@
 from django.db import models
 from projectApp2.models import Car
 from projectApp3.models import CarPart
+from django.contrib.auth.models import AbstractUser
 
 
-class User(models.Model):
+class User(AbstractUser):
     name = models.CharField(max_length=50, blank=False, null=False, default="user")
     username = models.CharField(max_length=50, blank=False, null=False, unique=True, default="user")
     email = models.EmailField(blank=False, null=False, unique=True)
